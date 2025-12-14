@@ -5,6 +5,9 @@ use sonic_rs::{JsonContainerTrait, json};
 use std::env;
 use url::Url;
 
+/// Default OpenAI API base URL
+const OPENAI_DEFAULT_BASE_URL: &str = "https://api.openai.com/v1";
+
 /// Trait for embedding models to fetch text embeddings.
 #[allow(async_fn_in_trait)]
 pub trait EmbeddingModel {
@@ -57,6 +60,14 @@ impl EmbeddingModelImpl {
                 let url_str = _url.unwrap_or("http://localhost:8699/embed");
                 Url::parse(url_str).map_err(|e| GraphError::from(format!("Invalid URL: {e}")))?;
                 Some(url_str.to_string())
+            }
+            EmbeddingProvider::OpenAI => {
+                // Support custom OpenAI-compatible endpoints via OPENAI_BASE_URL
+                let base_url = env::var("OPENAI_BASE_URL")
+                    .unwrap_or_else(|_| OPENAI_DEFAULT_BASE_URL.to_string());
+                // Strip trailing slash if present for consistent URL building
+                let base_url = base_url.trim_end_matches('/');
+                Some(format!("{}/embeddings", base_url))
             }
             _ => None,
         };
@@ -124,9 +135,14 @@ impl EmbeddingModel for EmbeddingModelImpl {
                     .as_ref()
                     .ok_or_else(|| GraphError::from("OpenAI API key not set"))?;
 
+                let url = self
+                    .url
+                    .as_ref()
+                    .ok_or_else(|| GraphError::from("OpenAI URL not set"))?;
+
                 let response = self
                     .client
-                    .post("https://api.openai.com/v1/embeddings")
+                    .post(url)
                     .header("Authorization", format!("Bearer {api_key}"))
                     .json(&json!({
                         "input": text,
