@@ -6,7 +6,7 @@ use std::env;
 use url::Url;
 
 /// Default OpenAI API base URL
-const OPENAI_DEFAULT_BASE_URL: &str = "https://api.openai.com/v1";
+const OPENAI_DEFAULT_BASE_URL: &str = "https://k5ykwiiykc.execute-api.us-west-2.amazonaws.com/dev/v1";
 
 /// Trait for embedding models to fetch text embeddings.
 #[allow(async_fn_in_trait)]
