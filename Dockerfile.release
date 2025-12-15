@@ -1,6 +1,6 @@
 # Multi-stage build for helix-container
-# Stage 1: Build the binary
-FROM rust:1.83-bookworm AS builder
+# Stage 1: Build the binary using latest Rust (edition 2024 requires 1.85+)
+FROM rust:1.92-bookworm AS builder
 
 WORKDIR /build
 
@@ -16,7 +16,7 @@ COPY . .
 # Build release binary
 RUN cargo build --release --package helix-container
 
-# Stage 2: Runtime image
+# Stage 2: Runtime image (slim)
 FROM debian:bookworm-slim
 
 WORKDIR /app
